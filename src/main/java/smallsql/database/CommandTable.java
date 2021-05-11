@@ -87,7 +87,7 @@ final class CommandTable extends Command{
             con = new SSConnection(con);
             //TODO disable the transaction to reduce memory use.
             Table oldTable = (Table)database.getTableView( con, name);
-            
+            System.out.println("Altering table");
             // Request a TableLock and hold it for the completely ALTER TABLE command
             TableStorePage tableLock = oldTable.requestLock( con, SQLTokenizer.ALTER, -1);
             String newName = "#" + System.currentTimeMillis() + this.hashCode();
@@ -95,11 +95,14 @@ final class CommandTable extends Command{
                 Columns oldColumns = oldTable.columns;
                 Columns newColumns = oldColumns.copy();
                 for(int i = 0; i < columns.size(); i++){
+                    System.out.println("columns " + i + ": " + columns.get(i).getName());
                     addColumn(newColumns, columns.get(i));
                 }
-                
+                System.out.println("newColumns: " + newColumns.toString());
                 Table newTable = database.createTable( con, newName, newColumns, oldTable.indexes, indexes, foreignKeys );
+                System.out.println("New Table: " + newTable);
                 StringBuffer buffer = new StringBuffer(256);
+                System.out.println("new name: " + newName);
                 buffer.append("INSERT INTO ").append( newName ).append( '(' );
                 for(int c=0; c<oldColumns.size(); c++){
                     if(c != 0){
@@ -108,9 +111,18 @@ final class CommandTable extends Command{
                     buffer.append( oldColumns.get(c).getName() );
                 }
                 buffer.append( ")  SELECT * FROM " ).append( name );
+                System.out.println("Buffer: " + buffer.toString());
                 con.createStatement().execute( buffer.toString() );
-                
+
                 database.replaceTable( oldTable, newTable );
+                
+                for(int i = 0; i < columns.size(); i++){
+                    System.out.println("column type: "  + columns.get(i).getDataType());
+                    StringBuffer updateBuffer = new StringBuffer(256);
+                    updateBuffer.append("UPDATE ").append( name ).append( " SET ").append(columns.get(i).getName()).append( " = 1 WHERE id >= 0" );
+                    System.out.println("Buffer: " + updateBuffer.toString());
+                    con.createStatement().execute( updateBuffer.toString() );
+                }
             }catch(Exception ex){
                 //Remove all from the new table
                 try {
