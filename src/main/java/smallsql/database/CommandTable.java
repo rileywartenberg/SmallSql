@@ -31,7 +31,9 @@
  * 
  */
 package smallsql.database;
-
+import smallsql.tools.cli;
+import java.sql.Statement;
+import java.sql.ResultSet;
 import java.sql.SQLException;
 import smallsql.tools.language.Language;
 
@@ -115,14 +117,27 @@ final class CommandTable extends Command{
                 con.createStatement().execute( buffer.toString() );
 
                 database.replaceTable( oldTable, newTable );
+                /*
+                Statement st1 = con.createStatement();
                 
+                st1.execute("select * from name" + "order by COL");
+                ResultSet rs = st1.getResultSet();
+                while (rs.next()) {
+                    for (int i = 1; i <= 1; i++) {
+                        System.out.print(rs.getObject(i));
+                        System.out.print('\t');
+                    }
+                    System.out.println();
+                }
+                */
+                /*
                 for(int i = 0; i < columns.size(); i++){
                     System.out.println("column type: "  + columns.get(i).getDataType());
                     StringBuffer updateBuffer = new StringBuffer(256);
                     updateBuffer.append("UPDATE ").append( name ).append( " SET ").append(columns.get(i).getName()).append( " = 1 WHERE id >= 0" );
                     System.out.println("Buffer: " + updateBuffer.toString());
                     con.createStatement().execute( updateBuffer.toString() );
-                }
+                }*/
             }catch(Exception ex){
                 //Remove all from the new table
                 try {
