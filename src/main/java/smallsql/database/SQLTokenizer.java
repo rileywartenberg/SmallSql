@@ -463,6 +463,14 @@ public class SQLTokenizer {
 	static final int ELSE 		= 266;
 	static final int END 		= 267;
 	static final int SWITCH 	= 268;
+
+    //add column sequences
+	static final int FIB 	    = 270;
+	static final int INDEXA	    = 271;
+	static final int INDEXD 	= 272;
+	static final int EVENS 	    = 273;
+	static final int ODDS 	    = 274;
+
 	
 	static final String DESC_STR   = "DESC";
     static{
@@ -534,6 +542,14 @@ public class SQLTokenizer {
 		addKeyWord( "ELSE",   		ELSE);
 		addKeyWord( "END",   		END);
 		addKeyWord( "SWITCH", 		SWITCH);
+
+
+        //add column sequences
+        addKeyWord( "FIB",      FIB);
+        addKeyWord( "INDEXA",   INDEXA);
+        addKeyWord( "INDEXD",   INDEXD);
+        addKeyWord( "EVENS",    EVENS);
+        addKeyWord( "ODDS",     ODDS);
     }
 
 

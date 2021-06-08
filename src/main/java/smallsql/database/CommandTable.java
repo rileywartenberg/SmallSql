@@ -31,10 +31,11 @@
  * 
  */
 package smallsql.database;
-import smallsql.tools.cli;
-import java.sql.Statement;
-import java.sql.ResultSet;
+import java.sql.*;
+
 import java.sql.SQLException;
+import java.util.List;
+import java.util.ArrayList;
 import smallsql.tools.language.Language;
 
 
@@ -44,7 +45,8 @@ final class CommandTable extends Command{
 	final private IndexDescriptions indexes = new IndexDescriptions();
     final private ForeignKeys foreignKeys = new ForeignKeys();
     final private int tableCommandType;
-    
+    private  List<String> orderByColumn = new ArrayList<String>();
+    private  List<Integer> sequenceValue = new ArrayList<Integer>();
 	
     CommandTable( Logger log, String catalog, String name, int tableCommandType ){
     	super(log);
@@ -75,6 +77,14 @@ final class CommandTable extends Command{
     void addForeingnKey(ForeignKey key){
         foreignKeys.add(key);
     }
+
+    void addOrderBy(String colname){
+        this.orderByColumn.add(colname);
+    }
+
+    void addSequence(int tokenvalue){
+        this.sequenceValue.add(tokenvalue);
+    }
     
     
     void executeImpl(SSConnection con, SSStatement st) throws Exception{
@@ -89,7 +99,7 @@ final class CommandTable extends Command{
             con = new SSConnection(con);
             //TODO disable the transaction to reduce memory use.
             Table oldTable = (Table)database.getTableView( con, name);
-            System.out.println("Altering table");
+            
             // Request a TableLock and hold it for the completely ALTER TABLE command
             TableStorePage tableLock = oldTable.requestLock( con, SQLTokenizer.ALTER, -1);
             String newName = "#" + System.currentTimeMillis() + this.hashCode();
@@ -97,14 +107,11 @@ final class CommandTable extends Command{
                 Columns oldColumns = oldTable.columns;
                 Columns newColumns = oldColumns.copy();
                 for(int i = 0; i < columns.size(); i++){
-                    System.out.println("columns " + i + ": " + columns.get(i).getName());
                     addColumn(newColumns, columns.get(i));
                 }
-                System.out.println("newColumns: " + newColumns.toString());
+                
                 Table newTable = database.createTable( con, newName, newColumns, oldTable.indexes, indexes, foreignKeys );
-                System.out.println("New Table: " + newTable);
                 StringBuffer buffer = new StringBuffer(256);
-                System.out.println("new name: " + newName);
                 buffer.append("INSERT INTO ").append( newName ).append( '(' );
                 for(int c=0; c<oldColumns.size(); c++){
                     if(c != 0){
@@ -113,31 +120,78 @@ final class CommandTable extends Command{
                     buffer.append( oldColumns.get(c).getName() );
                 }
                 buffer.append( ")  SELECT * FROM " ).append( name );
-                System.out.println("Buffer: " + buffer.toString());
                 con.createStatement().execute( buffer.toString() );
-
-                database.replaceTable( oldTable, newTable );
-                /*
-                Statement st1 = con.createStatement();
                 
-                st1.execute("select * from name" + "order by COL");
-                ResultSet rs = st1.getResultSet();
-                while (rs.next()) {
-                    for (int i = 1; i <= 1; i++) {
-                        System.out.print(rs.getObject(i));
-                        System.out.print('\t');
-                    }
-                    System.out.println();
-                }
-                */
-                /*
+                database.replaceTable( oldTable, newTable );
+                
+                //there are no sequences to update table with
+                if(orderByColumn.size() == 0)
+                    return;
+
+                //adding a sequence
                 for(int i = 0; i < columns.size(); i++){
-                    System.out.println("column type: "  + columns.get(i).getDataType());
-                    StringBuffer updateBuffer = new StringBuffer(256);
-                    updateBuffer.append("UPDATE ").append( name ).append( " SET ").append(columns.get(i).getName()).append( " = 1 WHERE id >= 0" );
-                    System.out.println("Buffer: " + updateBuffer.toString());
-                    con.createStatement().execute( updateBuffer.toString() );
-                }*/
+                    Statement st1 = con.createStatement();
+                    st1.execute("select * from " + name + " order by " + this.orderByColumn.get(i));
+                    ResultSet rs = st1.getResultSet();
+
+                    int seq_fib1 = 1;
+                    int seq_fib2 = 1;
+                    int seq = 0;
+                    int counter = 0;
+
+                    //for each row
+                    while (rs.next()) {
+                        StringBuffer updateBuffer = new StringBuffer(256);
+                        updateBuffer.append("UPDATE ").append(name).append(" SET ").append(columns.get(i).getName());
+                        counter += 1;
+                        switch(sequenceValue.get(i)){
+                            case 270: //Fib
+                                if(counter <= 2){   
+                                    seq = 1;
+                                    seq_fib1 = 1;
+                                    seq_fib2 = 1;
+                                }
+                                else{
+                                    seq = seq_fib1 + seq_fib2;
+                                    seq_fib1 = seq_fib2;
+                                    seq_fib2 = seq;
+                                }
+                                break;
+                            case 271: //Ascending
+                                seq += 1;
+                                break;
+                            case 272: //Descending
+                                seq = 0;
+                                break;
+                            case 273: //Evens
+                                seq += 2;
+                                break;
+                            case 274: //Odds
+                                if(counter == 1)
+                                    seq -= 1;
+                                seq += 2;
+                                break;
+                            default:
+                                return;
+                        }
+                        updateBuffer.append(" = "+seq);
+                        updateBuffer.append(" WHERE ");
+                        for (int j = 0; j < oldColumns.size(); j++) {
+                            if (rs.getObject(j+1) == null)
+                                continue;
+                            if(j != 0)
+                                updateBuffer.append(" AND ");
+                            updateBuffer.append(oldColumns.get(j).getName() + " = "+ rs.getObject(j+1));
+                            
+                        }
+                        System.out.println(updateBuffer.toString());
+                        con.createStatement().execute(updateBuffer.toString());
+                    }
+                }
+                
+
+
+
             }catch(Exception ex){
                 //Remove all from the new table
                 try {

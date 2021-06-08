@@ -662,7 +662,7 @@ Switch: while(true)
             switch(token.value){
                 case SQLTokenizer.PARENTHESIS_R:
                 case SQLTokenizer.COMMA:
-                    cmdCreate.addColumn( col );
+                    //cmdCreate.addColumn( col );
                     return token;
                 case SQLTokenizer.DEFAULT:
                     if(defaultWasSet) throw createSyntaxError( token, MISSING_COMMA_PARENTHESIS );
@@ -699,7 +699,23 @@ Switch: while(true)
 					cmdCreate.addIndex( index );
 					break;
                 default:
-                    throw createSyntaxError(token, MISSING_OPTIONS_DATATYPE);
+                    try{
+                        String sortCol = getIdentifier(token);
+                        cmdCreate.addColumn( col );
+                        cmdCreate.addOrderBy(sortCol);
+                        token = nextToken();
+                        if(token != null)
+                            cmdCreate.addSequence(token.value);
+                        else
+                            throw createSyntaxError(token, MISSING_OPTIONS_DATATYPE);
+                        token = nextToken();
+                        if(token != null)
+                            continue;
+                        return null;
+                    }
+                    catch(Exception e){
+                        throw createSyntaxError(token, MISSING_OPTIONS_DATATYPE);
+                    }
             }
             token = nextToken();
         }
