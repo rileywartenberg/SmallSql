@@ -662,7 +662,7 @@ Switch: while(true)
             switch(token.value){
                 case SQLTokenizer.PARENTHESIS_R:
                 case SQLTokenizer.COMMA:
-                    //cmdCreate.addColumn( col );
+                    cmdCreate.addColumn( col );
                     return token;
                 case SQLTokenizer.DEFAULT:
                     if(defaultWasSet) throw createSyntaxError( token, MISSING_COMMA_PARENTHESIS );
@@ -710,7 +710,7 @@ Switch: while(true)
                             throw createSyntaxError(token, MISSING_OPTIONS_DATATYPE);
                         token = nextToken();
                         if(token != null)
-                            continue;
+                            return token;
                         return null;
                     }
                     catch(Exception e){

@@ -36,6 +36,8 @@ import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
+
+import jdk.jfr.Timestamp;
 import smallsql.basicTestFrame;
 import smallsql.junit.BasicTestCase;
 
@@ -238,4 +240,5 @@ public class TestTokenizer extends BasicTestCase {
             out.println('\'' + parsedToken.getName(sourceSQL) + "' (" + parsedToken.offset + ')');
         }
     }
+
 }

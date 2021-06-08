@@ -2,6 +2,7 @@
  * Created on 14.11.2006
  */
 package smallsql.junit;
+import org.junit.jupiter.api.*;
 
 import smallsql.basicTestFrame;
 
@@ -13,11 +14,13 @@ import static smallsql.junit.JunitTestExtended.*;
 /**
  * @author Volker Berlin
  */
+@TestInstance(TestInstance.Lifecycle.PER_CLASS)
 public class TestAlterTable extends BasicTestCase {
 
     private final String table = "AlterTable";
     private final int rowCount = 10;
 
+    @BeforeAll
     public void setUp() {
         tearDown();
         try {
@@ -42,13 +45,14 @@ public class TestAlterTable extends BasicTestCase {
 
     public void tearDown() {
         try {
-            dropTable(basicTestFrame.getConnection(), table);
+            basicTestFrame.getConnection().createStatement().execute("DROP TABLE " + table);
+            //dropTable(basicTestFrame.getConnection(), table);
         } catch (SQLException ex) {
             ex.printStackTrace();
         }
     }
 
-
+    @Test
     public void testAdd1Column() throws Exception {
         Connection con = basicTestFrame.getConnection();
         Statement st = con.createStatement();
@@ -56,7 +60,6 @@ public class TestAlterTable extends BasicTestCase {
         ResultSet rs = st.executeQuery("Select * From " + table);
         assertRSMetaData(rs, new String[]{"i", "v", "a"}, new int[]{Types.INTEGER, Types.VARCHAR, Types.VARCHAR});
     }
-
 
     public void testAdd2Column() throws Exception {
         Connection con = basicTestFrame.getConnection();
@@ -71,7 +74,6 @@ public class TestAlterTable extends BasicTestCase {
         }
         assertEquals("RowCount", rowCount, count);
     }
-
 
     public void testAddWithTableLock_REPEATABLE_READ() throws Exception {
         Connection con = basicTestFrame.getConnection();
@@ -94,7 +96,6 @@ public class TestAlterTable extends BasicTestCase {
             con.setAutoCommit(true);
         }
     }
-
 
     public void testAddWithTableLock_READ_COMMITTED() throws Exception {
         Connection con = basicTestFrame.getConnection();
