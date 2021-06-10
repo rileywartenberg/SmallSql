@@ -1,0 +1,27 @@
+CREATE TABLE csc468demo (id int, name varchar(100), balance float);
+INSERT INTO csc468demo VALUES (1,  'sean',   100.99);
+INSERT INTO csc468demo VALUES (3,  'sanj',  7190.42);
+INSERT INTO csc468demo VALUES (2,  'riley',  789.00);
+INSERT INTO csc468demo VALUES (4,  'kristy', -42.50);
+INSERT INTO csc468demo VALUES (9,  'silvia', 480.34);
+INSERT INTO csc468demo VALUES (10, 'traci',  960.24);
+INSERT INTO csc468demo VALUES (7,  'ashley', -83.45);
+INSERT INTO csc468demo VALUES (6,  'lionel', 670.71);
+INSERT INTO csc468demo VALUES (5,  'seth',  3088.00);
+INSERT INTO csc468demo VALUES (8,  'jacob',   20.21);
+SELECT * FROM csc468demo;
+
+ALTER TABLE csc468demo ADD invRank INT balance INDEXA;
+SELECT * FROM csc468demo;
+SELECT * FROM csc468demo ORDER BY invRank;
+
+ALTER TABLE csc468demo ADD fibC INT id FIB;
+SELECT * FROM csc468demo;
+SELECT * FROM csc468demo ORDER BY fibC;
+
+ALTER TABLE csc468demo ADD oddC INT name ODDS, evenC INT balance EVENS;
+SELECT * FROM csc468demo;
+SELECT * FROM csc468demo ORDER BY oddC;
+SELECT * FROM csc468demo ORDER BY evenC;
+
+DROP TABLE csc468demo;

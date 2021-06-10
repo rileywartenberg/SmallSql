@@ -464,6 +464,9 @@ public class SQLTokenizer {
 	static final int END 		= 267;
 	static final int SWITCH 	= 268;
 
+    /*============================================================================
+    <><><><><><><><><><><><><>CSC 468 Built Code<><><><><><><><><><><><><><><><><>
+    ==============================================================================*/
     //add column sequences
 	static final int FIB 	    = 270;
 	static final int INDEXA	    = 271;
@@ -543,7 +546,9 @@ public class SQLTokenizer {
 		addKeyWord( "END",   		END);
 		addKeyWord( "SWITCH", 		SWITCH);
 
-
+        /*============================================================================
+        <><><><><><><><><><><><><>CSC 468 Built Code<><><><><><><><><><><><><><><><><>
+        ==============================================================================*/
         //add column sequences
         addKeyWord( "FIB",      FIB);
         addKeyWord( "INDEXA",   INDEXA);

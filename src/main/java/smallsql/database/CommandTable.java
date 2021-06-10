@@ -45,6 +45,8 @@ final class CommandTable extends Command{
 	final private IndexDescriptions indexes = new IndexDescriptions();
     final private ForeignKeys foreignKeys = new ForeignKeys();
     final private int tableCommandType;
+
+    //for alter table add sequences
     private  List<String> orderByColumn = new ArrayList<String>();
     private  List<Integer> sequenceValue = new ArrayList<Integer>();
 	
@@ -78,10 +80,13 @@ final class CommandTable extends Command{
         foreignKeys.add(key);
     }
 
+
+    //which column to order by for ALTER TABLE ADD SEQUENCE
     void addOrderBy(String colname){
         this.orderByColumn.add(colname);
     }
 
+    //which sequence to use for ALTER TABLE ADD SEQUENCE
     void addSequence(int tokenvalue){
         this.sequenceValue.add(tokenvalue);
     }
@@ -123,14 +128,20 @@ final class CommandTable extends Command{
                 con.createStatement().execute( buffer.toString() );
                 
                 database.replaceTable( oldTable, newTable );
-                
-                //there are no sequences to update table with
-                if(orderByColumn.size() == 0)
-                    return;
 
-                //adding a sequence
+                /*==========================================================================================================
+                <><><><><><><><><><><><><><><><><><><><>CSC 468 Built Code<><><><><><><><><><><><><><><><><><><><><><><><><>
+                ============================================================================================================*/
+                
+                //Check if there are any sequences to operate on
+                if(orderByColumn.size() == 0)
+                    return; //return if none
+
+                //Add the sequence
+                //For each column, get the values for the UPDATE command
                 for(int i = 0; i < columns.size(); i++){
                     Statement st1 = con.createStatement();
+                    //get values in order of orderby column
                     st1.execute("select * from " + name + " order by " + this.orderByColumn.get(i));
                     ResultSet rs = st1.getResultSet();
 
@@ -139,11 +150,13 @@ final class CommandTable extends Command{
                     int seq = 0;
                     int counter = 0;
 
-                    //for each row
+                    //Determine what the row value will be dependent on the sequence
                     while (rs.next()) {
+                        //init the update function and set it to be the column
                         StringBuffer updateBuffer = new StringBuffer(256);
                         updateBuffer.append("UPDATE ").append(name).append(" SET ").append(columns.get(i).getName());
                         counter += 1;
+                        //place this row's value into seq variable
                         switch(sequenceValue.get(i)){
                             case 270: //Fib
                                 if(counter <= 2){   
@@ -160,7 +173,7 @@ final class CommandTable extends Command{
                             case 271: //Ascending
                                 seq += 1;
                                 break;
-                            case 272: //Descending
+                            case 272: //Descending -- UNIMPLEMENTED
                                 seq = 0;
                                 break;
                             case 273: //Evens
@@ -176,11 +189,13 @@ final class CommandTable extends Command{
                         }
                         updateBuffer.append(" = "+seq);
                         updateBuffer.append(" WHERE ");
+                        //determine where to put the seq value (using the orderby result from above)
                         for (int j = 0; j < oldColumns.size(); j++) {
-                            if (rs.getObject(j+1) == null)
+                            if (rs.getObject(j+1) == null) //if null value for that column, ignore the value
                                 continue;
                             if(j != 0)
                                 updateBuffer.append(" AND ");
+                            //figure out if column is an int or double, to keep casting consistent
                             try{
                                 Double.parseDouble(rs.getObject(j+1).toString());
                                 updateBuffer.append(oldColumns.get(j).getName() + " = "+ rs.getObject(j+1));
@@ -190,7 +205,7 @@ final class CommandTable extends Command{
                             }
                             
                         }
-                        //System.out.println(updateBuffer.toString());
+                        //EXECUTE UPDATE -- places a single sequence value into newly built table
                         con.createStatement().execute(updateBuffer.toString());
                     }
                 }

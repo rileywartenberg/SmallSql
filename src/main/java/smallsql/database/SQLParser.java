@@ -699,18 +699,23 @@ Switch: while(true)
 					cmdCreate.addIndex( index );
 					break;
                 default:
+                /*============================================================================
+                <><><><><><><><><><><><><>CSC 468 Built Code<><><><><><><><><><><><><><><><><>
+                ==============================================================================*/
+                    //try determining if future tokens are referencing
+                        //ALTER TABLE ADD SEQUENCE
                     try{
                         String sortCol = getIdentifier(token);
                         cmdCreate.addColumn( col );
-                        cmdCreate.addOrderBy(sortCol);
+                        cmdCreate.addOrderBy(sortCol);  //pass order by column to command Object
                         token = nextToken();
                         if(token != null)
-                            cmdCreate.addSequence(token.value);
+                            cmdCreate.addSequence(token.value);//pass sequence type to command Object
                         else
                             throw createSyntaxError(token, MISSING_OPTIONS_DATATYPE);
                         token = nextToken();
                         if(token != null)
-                            return token;
+                            return token; //return back to normal parsing
                         return null;
                     }
                     catch(Exception e){
