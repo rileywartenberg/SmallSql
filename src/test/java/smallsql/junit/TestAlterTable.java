@@ -14,20 +14,18 @@ import static smallsql.junit.JunitTestExtended.*;
 /**
  * @author Volker Berlin
  */
-@TestInstance(TestInstance.Lifecycle.PER_CLASS)
 public class TestAlterTable extends BasicTestCase {
 
     private final String table = "AlterTable";
     private final int rowCount = 10;
 
-    @BeforeAll
     public void setUp() {
         tearDown();
         try {
             Connection con = basicTestFrame.getConnection();
             Statement st = con.createStatement();
             st.execute("create table " + table + "(i int, v varchar(100))");
-            st.execute("Insert into " + table + " Values(1,'abc')");
+            st.execute("Insert into " + table + " Values(1,'whaaat')");
             st.execute("Insert into " + table + " Values(2,'bcd')");
             st.execute("Insert into " + table + " Values(3,'cde')");
             st.execute("Insert into " + table + " Values(4,'def')");
@@ -52,7 +50,6 @@ public class TestAlterTable extends BasicTestCase {
         }
     }
 
-    @Test
     public void testAdd1Column() throws Exception {
         Connection con = basicTestFrame.getConnection();
         Statement st = con.createStatement();
@@ -60,6 +57,7 @@ public class TestAlterTable extends BasicTestCase {
         ResultSet rs = st.executeQuery("Select * From " + table);
         assertRSMetaData(rs, new String[]{"i", "v", "a"}, new int[]{Types.INTEGER, Types.VARCHAR, Types.VARCHAR});
     }
+    
 
     public void testAdd2Column() throws Exception {
         Connection con = basicTestFrame.getConnection();

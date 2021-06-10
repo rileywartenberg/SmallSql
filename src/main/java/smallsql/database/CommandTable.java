@@ -181,10 +181,16 @@ final class CommandTable extends Command{
                                 continue;
                             if(j != 0)
                                 updateBuffer.append(" AND ");
-                            updateBuffer.append(oldColumns.get(j).getName() + " = "+ rs.getObject(j+1));
+                            try{
+                                Double.parseDouble(rs.getObject(j+1).toString());
+                                updateBuffer.append(oldColumns.get(j).getName() + " = "+ rs.getObject(j+1));
+                            }
+                            catch(Exception e){
+                                updateBuffer.append(oldColumns.get(j).getName() + " = '"+ rs.getObject(j+1)+"'");
+                            }
                             
                         }
-                        System.out.println(updateBuffer.toString());
+                        //System.out.println(updateBuffer.toString());
                         con.createStatement().execute(updateBuffer.toString());
                     }
                 }
